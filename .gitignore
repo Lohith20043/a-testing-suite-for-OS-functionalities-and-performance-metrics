@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OS Functionality and Performance Test Suite</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
+    header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
+    .test-selection { text-align: center; margin: 30px; }
+    h2 { font-size: 28px; font-weight: bold; color: #333; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+    span { padding: 10px; border-radius: 5px; font-size: 24px; font-weight: bold; }
+    .functionality-test { background-color: #8BC34A; color: white; }
+    .performance-test { background-color: #FF5722; color: white; }
+    label { font-size: 20px; font-weight: bold; margin-right: 10px; color: #333; }
+    input[type="radio"] { transform: scale(1.5); margin-right: 15px; }
+    button { background-color: #4CAF50; color: white; padding: 15px 30px; border: none; cursor: pointer; font-size: 20px; font-weight: bold; margin-top: 20px; border-radius: 5px; }
+    button:hover { background-color: #45a049; }
+    #progress-bar { width: 100%; background-color: #ddd; height: 20px; border-radius: 5px; margin-top: 20px; }
+    #test-output { margin-top: 20px; font-size: 16px; }
+    .results { margin-top: 40px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; text-align: left; }
+    th { background-color: #4CAF50; color: white; }
+    td { background-color: #f2f2f2; }
+    .success { color: green; }
+    .failure { color: red; }
+    .graph-container { margin-top: 30px; text-align: center; display: none; }
+    canvas { max-width: 600px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Interactive OS Functionality and Performance Testing Suite</h1>
+  </header>
+
+  <div class="test-selection">
+    <h2><span class="functionality-test">Functionality Test</span> vs <span class="performance-test">Performance Test</span></h2>
+    <p style="font-size: 22px; font-weight: bold; color: #333; margin-bottom: 30px;">
+      Select the type of test you want to run and press "Start Test" to begin. 
+      <br>
+      Functionality tests check if the system operates as expected, while performance tests measure the system's efficiency.
+    </p>
+    <label for="functionality-test">Functionality Test</label>
+    <input type="radio" id="functionality-test" name="test-type" value="functionality">
+    <label for="performance-test">Performance Test</label>
+    <input type="radio" id="performance-test" name="test-type" value="performance">
+    <button id="start-test">Start Test</button>
+  </div>
+
+  <!-- Functionality Test Inputs -->
+  <div id="functionality-test-options" style="display: none;">
+    <h3>Select Functionality Test</h3>
+    <button id="boot-test">Booting Process</button>
+    <button id="file-test">File Management</button>
+    <button id="memory-test">Memory Management</button>
+  </div>
+
+  <!-- Performance Test Inputs -->
+  <div id="performance-test-options" style="display: none;">
+    <h3>Select Performance Test</h3>
+    <button id="cpu-test">CPU Usage</button>
+    <button id="memory-usage-test">Memory Usage</button>
+    <button id="disk-io-test">Disk I/O Performance</button>
+  </div>
+
+  <div class="test-progress">
+    <h3>Test Status</h3>
+    <div id="progress-bar"></div>
+    <div id="test-output"></div>
+  </div>
+
+  <div class="results">
+    <h3>Test Results</h3>
+    <table id="results-table">
+      <thead>
+        <tr>
+          <th>Test</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Suggestion</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="graph-container">
+    <h3>Test Performance Graph</h3>
+    <canvas id="testGraph" width="400" height="200"></canvas>
+    <p id="graph-progress"></p>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 OS Testing Suite</p>
+  </footer>
+
+  <script>
+    let chartInstance;
+    let testLabels = [];
+    let testData = [];
+    let totalTests = 0;
+    let completedTests = 0;
+
+    document.getElementById('start-test').addEventListener('click', function () {
+      const testType = document.querySelector('input[name="test-type"]:checked')?.value;
+      if (!testType) {
+        alert("Please select a test type.");
+        return;
+      }
+
+      testLabels = [];
+      testData = [];
+      completedTests = 0;
+      totalTests = 3;
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      const ctx = document.getElementById('testGraph').getContext('2d');
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: testLabels,
+          datasets: [{
+            label: 'Test Results',
+            data: testData,
+            backgroundColor: [],
+            borderColor: [],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+
+      document.getElementById('functionality-test-options').style.display = (testType === 'functionality') ? 'block' : 'none';
+      document.getElementById('performance-test-options').style.display = (testType === 'performance') ? 'block' : 'none';
+      document.querySelector('.graph-container').style.display = 'none';
+    });
+
+    const testButtons = {
+      'boot-test': ['Booting Process', 'Verifies if the system boots correctly.', 'functionality'],
+      'file-test': ['File Management', 'Tests file creation, reading, modification, and deletion.', 'functionality'],
+      'memory-test': ['Memory Management', 'Verifies proper memory allocation and deallocation.', 'functionality'],
+      'cpu-test': ['CPU Usage', 'Measures CPU usage during various processes.', 'performance'],
+      'memory-usage-test': ['Memory Usage', 'Tests memory usage and checks for leaks.', 'performance'],
+      'disk-io-test': ['Disk I/O Performance', 'Measures disk read/write speeds during file operations.', 'performance']
+    };
+
+    for (const id in testButtons) {
+      document.getElementById(id).addEventListener('click', () => {
+        const [testName, testDesc, testType] = testButtons[id];
+        const suggestions = [
+          'Optimize configuration',
+          'Check logs and errors',
+          'Use system monitoring tools'
+        ];
+        runTest(testName, testDesc, suggestions, testType);
+      });
+    }
+
+    function runTest(testName, testDescription, suggestions, testType) {
+      const progressBar = document.getElementById('progress-bar');
+      const output = document.getElementById('test-output');
+      const table = document.getElementById('results-table').getElementsByTagName('tbody')[0];
+      let testProgress = 0;
+
+      progressBar.style.width = '0%';
+      output.textContent = 'Test starting...';
+      
+      const progressInterval = setInterval(() => {
+        testProgress += 10;
+        progressBar.style.width = `${testProgress}%`;
+        output.textContent = `Running ${testName} (${testProgress}%)...`;
+
+        if (testProgress >= 100) {
+          clearInterval(progressInterval);
+
+          progressBar.style.width = '100%';
+          output.textContent = `${testName} test completed!`;
+
+          const newRow = table.insertRow();
+          newRow.insertCell(0).textContent = testName;
+          newRow.insertCell(1).textContent = testDescription;
+
+          const isTestSuccessful = Math.random() > 0.5;
+          const statusCell = newRow.insertCell(2);
+          const suggestionCell = newRow.insertCell(3);
+
+          statusCell.textContent = isTestSuccessful ? 'Success' : 'Failure';
+          statusCell.classList.add(isTestSuccessful ? 'success' : 'failure');
+          statusCell.innerHTML += isTestSuccessful ? ' &#10004;' : ' &#10060;';
+
+          if (!isTestSuccessful) {
+            suggestionCell.textContent = `Suggestion: ${suggestions.join(', ')}`;
+            suggestionCell.classList.add('suggestion');
+          }
+
+          testLabels.push(testName);
+          testData.push(isTestSuccessful ? 100 : 0);
+          chartInstance.data.labels = testLabels;
+          chartInstance.data.datasets[0].data = testData;
+          chartInstance.data.datasets[0].backgroundColor.push(isTestSuccessful ? '#8BC34A' : '#FF5252');
+          chartInstance.data.datasets[0].borderColor.push(isTestSuccessful ? '#4CAF50' : '#D32F2F');
+
+          completedTests++;
+
+          if (completedTests === totalTests) {
+            document.querySelector('.graph-container').style.display = 'block';
+            chartInstance.update();
+
+            const graphPercent = Math.round((testData.filter(x => x === 100).length / totalTests) * 100);
+            document.getElementById('graph-progress').textContent = `Overall Success Rate: ${graphPercent}%`;
+          }
+        }
+      }, 300);
+    }
+  </script>
+</body>
+</html>
