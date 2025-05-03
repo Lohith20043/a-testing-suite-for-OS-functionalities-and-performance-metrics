@@ -3,228 +3,338 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OS Functionality and Performance Test Suite</title>
+  <title>OS Testing Suite Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
-    header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
-    .test-selection { text-align: center; margin: 30px; }
-    h2 { font-size: 28px; font-weight: bold; color: #333; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
-    span { padding: 10px; border-radius: 5px; font-size: 24px; font-weight: bold; }
-    .functionality-test { background-color: #8BC34A; color: white; }
-    .performance-test { background-color: #FF5722; color: white; }
-    label { font-size: 20px; font-weight: bold; margin-right: 10px; color: #333; }
-    input[type="radio"] { transform: scale(1.5); margin-right: 15px; }
-    button { background-color: #4CAF50; color: white; padding: 15px 30px; border: none; cursor: pointer; font-size: 20px; font-weight: bold; margin-top: 20px; border-radius: 5px; }
-    button:hover { background-color: #45a049; }
-    #progress-bar { width: 100%; background-color: #ddd; height: 20px; border-radius: 5px; margin-top: 20px; }
-    #test-output { margin-top: 20px; font-size: 16px; }
-    .results { margin-top: 40px; text-align: center; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px; text-align: left; }
-    th { background-color: #4CAF50; color: white; }
-    td { background-color: #f2f2f2; }
-    .success { color: green; }
-    .failure { color: red; }
-    .graph-container { margin-top: 30px; text-align: center; display: none; }
-    canvas { max-width: 600px; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #dfe9f3 10%, #ffffff 100%);
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+    }
+    h1 {
+      font-size: 3rem;
+      text-align: center;
+      color: #34495e;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+      font-weight: 700;
+      border-bottom: 4px solid #2980b9;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.8rem;
+      color: #2980b9;
+      font-weight: 600;
+      text-transform: uppercase;
+      border-bottom: 2px solid #2980b9;
+      padding-bottom: 5px;
+    }
+    .metrics-card {
+      margin-top: 40px;
+    }
+    #liveData {
+      font-size: 20px;
+      font-weight: 500;
+      color: #34495e;
+      margin-bottom: 20px;
+    }
+    #systemCondition {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .healthy {
+      color: #27ae60;
+    }
+    .moderate {
+      color: #f39c12;
+    }
+    .critical {
+      color: #e74c3c;
+    }
+    #loadReason {
+      font-size: 16px;
+      font-style: italic;
+      color: #7f8c8d;
+    }
+    .highlight {
+      color: #e74c3c; /* Red color for highlighting */
+      font-weight: bold;
+    }
+    .bar-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .bar-box {
+      width: 30%;
+      height: 150px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      padding: 10px;
+      position: relative;
+      flex: 1 1 30%;
+    }
+    .bar-box h3 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      margin: auto;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background-color: #2980b9;
+      transform: translateY(-3px);
+    }
+    #resultTable {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+    }
+    #resultTable th, #resultTable td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    #resultTable th {
+      background-color: #ecf0f1;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Interactive OS Functionality and Performance Testing Suite</h1>
-  </header>
+  <div class="container">
+    <h1>OS Functionality & Performance Testing Suite</h1>
+    <div class="metrics-card">
+      <h2>Live System Metrics</h2>
+      <div id="liveData">
+        <span>CPU Usage: <span id="cpuVal" class="highlight">0</span>% | 
+        Memory Usage: <span id="memVal" class="highlight">0</span>% | 
+        Disk Usage: <span id="diskVal" class="highlight">0</span>%</span>
+      </div>
+      <div id="systemCondition" class="healthy">System Condition: Healthy ✅</div>
+      <div id="loadReason">Reason: Currently analyzing system metrics...</div>
+      <canvas id="metricsChart" width="600" height="300"></canvas>
+      <p><strong>Note:</strong> These values are simulated for demonstration. The graphs update in real-time.</p>
+    </div>
 
-  <div class="test-selection">
-    <h2><span class="functionality-test">Functionality Test</span> vs <span class="performance-test">Performance Test</span></h2>
-    <p style="font-size: 22px; font-weight: bold; color: #333; margin-bottom: 30px;">
-      Select the type of test you want to run and press "Start Test" to begin. 
-      <br>
-      Functionality tests check if the system operates as expected, while performance tests measure the system's efficiency.
-    </p>
-    <label for="functionality-test">Functionality Test</label>
-    <input type="radio" id="functionality-test" name="test-type" value="functionality">
-    <label for="performance-test">Performance Test</label>
-    <input type="radio" id="performance-test" name="test-type" value="performance">
-    <button id="start-test">Start Test</button>
-  </div>
+    <div class="bar-container">
+      <div class="bar-box"><h3>CPU Usage</h3><canvas id="cpuBarCurrent" height="120"></canvas></div>
+      <div class="bar-box"><h3>Memory Usage</h3><canvas id="memBarCurrent" height="120"></canvas></div>
+      <div class="bar-box"><h3>Disk Usage</h3><canvas id="diskBarCurrent" height="120"></canvas></div>
+    </div>
 
-  <!-- Functionality Test Inputs -->
-  <div id="functionality-test-options" style="display: none;">
-    <h3>Select Functionality Test</h3>
-    <button id="boot-test">Booting Process</button>
-    <button id="file-test">File Management</button>
-    <button id="memory-test">Memory Management</button>
-  </div>
+    <div class="button-container">
+      <button id="runTestBtn" onclick="toggleTest()">Run Test</button>
+    </div>
 
-  <!-- Performance Test Inputs -->
-  <div id="performance-test-options" style="display: none;">
-    <h3>Select Performance Test</h3>
-    <button id="cpu-test">CPU Usage</button>
-    <button id="memory-usage-test">Memory Usage</button>
-    <button id="disk-io-test">Disk I/O Performance</button>
-  </div>
-
-  <div class="test-progress">
-    <h3>Test Status</h3>
-    <div id="progress-bar"></div>
-    <div id="test-output"></div>
-  </div>
-
-  <div class="results">
-    <h3>Test Results</h3>
-    <table id="results-table">
+    <table id="resultTable" style="display:none;">
       <thead>
         <tr>
-          <th>Test</th>
-          <th>Description</th>
+          <th>Test #</th>
+          <th>CPU Usage (%)</th>
+          <th>Memory Usage (%)</th>
+          <th>Disk Usage (%)</th>
           <th>Status</th>
-          <th>Suggestion</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="resultBody"></tbody>
     </table>
   </div>
 
-  <div class="graph-container">
-    <h3>Test Performance Graph</h3>
-    <canvas id="testGraph" width="400" height="200"></canvas>
-    <p id="graph-progress"></p>
-  </div>
-
-  <footer>
-    <p>&copy; 2025 OS Testing Suite</p>
-  </footer>
-
   <script>
-    let chartInstance;
-    let testLabels = [];
-    let testData = [];
-    let totalTests = 0;
-    let completedTests = 0;
+    let cpuUsage = 40, memoryUsage = 55, diskUsage = 60;
+    let prevCpuUsage = 40, prevMemUsage = 55, prevDiskUsage = 60;
+    let isTestRunning = false, intervalId, testCounter = 1;
 
-    document.getElementById('start-test').addEventListener('click', function () {
-      const testType = document.querySelector('input[name="test-type"]:checked')?.value;
-      if (!testType) {
-        alert("Please select a test type.");
-        return;
+    const cpuValEl = document.getElementById("cpuVal");
+    const memValEl = document.getElementById("memVal");
+    const diskValEl = document.getElementById("diskVal");
+    const systemConditionEl = document.getElementById("systemCondition");
+    const loadReasonEl = document.getElementById("loadReason");
+    const resultTable = document.getElementById("resultTable");
+    const resultBody = document.getElementById("resultBody");
+
+    const ctxMain = document.getElementById('metricsChart').getContext('2d');
+    const chartMain = new Chart(ctxMain, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'CPU (%)', data: [], borderColor: 'red', fill: false },
+          { label: 'Memory (%)', data: [], borderColor: 'blue', fill: false },
+          { label: 'Disk (%)', data: [], borderColor: 'green', fill: false }
+        ]
+      },
+      options: {
+        scales: { y: { beginAtZero: true, max: 100 } }
       }
+    });
 
-      testLabels = [];
-      testData = [];
-      completedTests = 0;
-      totalTests = 3;
-
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
-
-      const ctx = document.getElementById('testGraph').getContext('2d');
-      chartInstance = new Chart(ctx, {
+    function createBarGraph(canvasId, color) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      return new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: testLabels,
+          labels: ['Current', 'Previous', 'Past'],
           datasets: [{
-            label: 'Test Results',
-            data: testData,
-            backgroundColor: [],
-            borderColor: [],
-            borderWidth: 1
+            label: 'Percentage',
+            data: [0, 0, 0],
+            backgroundColor: color,
+            borderRadius: 5
           }]
         },
         options: {
+          scales: { y: { beginAtZero: true, max: 100 } },
           responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100
-            }
-          }
+          maintainAspectRatio: false
         }
-      });
-
-      document.getElementById('functionality-test-options').style.display = (testType === 'functionality') ? 'block' : 'none';
-      document.getElementById('performance-test-options').style.display = (testType === 'performance') ? 'block' : 'none';
-      document.querySelector('.graph-container').style.display = 'none';
-    });
-
-    const testButtons = {
-      'boot-test': ['Booting Process', 'Verifies if the system boots correctly.', 'functionality'],
-      'file-test': ['File Management', 'Tests file creation, reading, modification, and deletion.', 'functionality'],
-      'memory-test': ['Memory Management', 'Verifies proper memory allocation and deallocation.', 'functionality'],
-      'cpu-test': ['CPU Usage', 'Measures CPU usage during various processes.', 'performance'],
-      'memory-usage-test': ['Memory Usage', 'Tests memory usage and checks for leaks.', 'performance'],
-      'disk-io-test': ['Disk I/O Performance', 'Measures disk read/write speeds during file operations.', 'performance']
-    };
-
-    for (const id in testButtons) {
-      document.getElementById(id).addEventListener('click', () => {
-        const [testName, testDesc, testType] = testButtons[id];
-        const suggestions = [
-          'Optimize configuration',
-          'Check logs and errors',
-          'Use system monitoring tools'
-        ];
-        runTest(testName, testDesc, suggestions, testType);
       });
     }
 
-    function runTest(testName, testDescription, suggestions, testType) {
-      const progressBar = document.getElementById('progress-bar');
-      const output = document.getElementById('test-output');
-      const table = document.getElementById('results-table').getElementsByTagName('tbody')[0];
-      let testProgress = 0;
+    const cpuBarCurrent = createBarGraph('cpuBarCurrent', 'rgba(255, 99, 132, 0.6)');
+    const memBarCurrent = createBarGraph('memBarCurrent', 'rgba(54, 162, 235, 0.6)');
+    const diskBarCurrent = createBarGraph('diskBarCurrent', 'rgba(75, 192, 192, 0.6)');
 
-      progressBar.style.width = '0%';
-      output.textContent = 'Test starting...';
-      
-      const progressInterval = setInterval(() => {
-        testProgress += 10;
-        progressBar.style.width = `${testProgress}%`;
-        output.textContent = `Running ${testName} (${testProgress}%)...`;
+    function toggleTest() {
+      const button = document.getElementById("runTestBtn");
+      if (!isTestRunning) {
+        intervalId = setInterval(updateMetrics, 3000);
+        button.textContent = "Stop Test";
+        isTestRunning = true;
+      } else {
+        clearInterval(intervalId);
+        button.textContent = "Run Test";
+        isTestRunning = false;
+        displayTestResult();
+      }
+    }
 
-        if (testProgress >= 100) {
-          clearInterval(progressInterval);
+    function updateMetrics() {
+      prevCpuUsage = cpuUsage;
+      prevMemUsage = memoryUsage;
+      prevDiskUsage = diskUsage;
 
-          progressBar.style.width = '100%';
-          output.textContent = `${testName} test completed!`;
+      cpuUsage += Math.random() * 8 - 4;
+      memoryUsage += Math.random() * 8 - 4;
+      diskUsage += Math.random() * 8 - 4;
 
-          const newRow = table.insertRow();
-          newRow.insertCell(0).textContent = testName;
-          newRow.insertCell(1).textContent = testDescription;
+      cpuUsage = Math.max(0, Math.min(100, cpuUsage));
+      memoryUsage = Math.max(0, Math.min(100, memoryUsage));
+      diskUsage = Math.max(0, Math.min(100, diskUsage));
 
-          const isTestSuccessful = Math.random() > 0.5;
-          const statusCell = newRow.insertCell(2);
-          const suggestionCell = newRow.insertCell(3);
+      cpuValEl.textContent = cpuUsage.toFixed(1);
+      memValEl.textContent = memoryUsage.toFixed(1);
+      diskValEl.textContent = diskUsage.toFixed(1);
 
-          statusCell.textContent = isTestSuccessful ? 'Success' : 'Failure';
-          statusCell.classList.add(isTestSuccessful ? 'success' : 'failure');
-          statusCell.innerHTML += isTestSuccessful ? ' &#10004;' : ' &#10060;';
+      updateMetricsColor();
+      updateSystemCondition();
+      updateBarGraphs();
+      updateMainChart();
+    }
 
-          if (!isTestSuccessful) {
-            suggestionCell.textContent = `Suggestion: ${suggestions.join(', ')}`;
-            suggestionCell.classList.add('suggestion');
-          }
+    function updateMetricsColor() {
+      if (cpuUsage > 70) {
+        cpuValEl.style.color = 'red';
+      } else {
+        cpuValEl.style.color = 'green';
+      }
 
-          testLabels.push(testName);
-          testData.push(isTestSuccessful ? 100 : 0);
-          chartInstance.data.labels = testLabels;
-          chartInstance.data.datasets[0].data = testData;
-          chartInstance.data.datasets[0].backgroundColor.push(isTestSuccessful ? '#8BC34A' : '#FF5252');
-          chartInstance.data.datasets[0].borderColor.push(isTestSuccessful ? '#4CAF50' : '#D32F2F');
+      if (memoryUsage > 70) {
+        memValEl.style.color = 'red';
+      } else {
+        memValEl.style.color = 'green';
+      }
 
-          completedTests++;
+      if (diskUsage > 70) {
+        diskValEl.style.color = 'red';
+      } else {
+        diskValEl.style.color = 'green';
+      }
+    }
 
-          if (completedTests === totalTests) {
-            document.querySelector('.graph-container').style.display = 'block';
-            chartInstance.update();
+    function updateSystemCondition() {
+      let condition = "System Condition: Healthy ✅";
+      let conditionClass = "healthy";
+      const maxVal = Math.max(cpuUsage, memoryUsage, diskUsage);
 
-            const graphPercent = Math.round((testData.filter(x => x === 100).length / totalTests) * 100);
-            document.getElementById('graph-progress').textContent = `Overall Success Rate: ${graphPercent}%`;
-          }
-        }
-      }, 300);
+      if (maxVal > 85) {
+        condition = "System Condition: High Load 🔴";
+        conditionClass = "critical";
+      } else if (maxVal > 70) {
+        condition = "System Condition: Moderate Load ⚠️";
+        conditionClass = "moderate";
+      }
+
+      systemConditionEl.textContent = condition;
+      systemConditionEl.className = conditionClass;
+      loadReasonEl.innerHTML = `Reason: Currently analyzing system metrics...`;
+    }
+
+    function updateBarGraphs() {
+      cpuBarCurrent.data.datasets[0].data = [cpuUsage, prevCpuUsage, Math.random() * 100];
+      memBarCurrent.data.datasets[0].data = [memoryUsage, prevMemUsage, Math.random() * 100];
+      diskBarCurrent.data.datasets[0].data = [diskUsage, prevDiskUsage, Math.random() * 100];
+      cpuBarCurrent.update();
+      memBarCurrent.update();
+      diskBarCurrent.update();
+    }
+
+    function updateMainChart() {
+      if (chartMain.data.labels.length > 20) {
+        chartMain.data.labels.shift();
+        chartMain.data.datasets.forEach(ds => ds.data.shift());
+      }
+      chartMain.data.labels.push(new Date().toLocaleTimeString());
+      chartMain.data.datasets[0].data.push(cpuUsage);
+      chartMain.data.datasets[1].data.push(memoryUsage);
+      chartMain.data.datasets[2].data.push(diskUsage);
+      chartMain.update();
+    }
+
+    function displayTestResult() {
+      resultTable.style.display = "table";
+      const row = document.createElement("tr");
+      const status = (cpuUsage < 80 && memoryUsage < 80 && diskUsage < 80) ? "Pass ✅" : "Fail ❌";
+      row.innerHTML = `<td>${testCounter++}</td>
+                       <td>${cpuUsage.toFixed(1)}</td>
+                       <td>${memoryUsage.toFixed(1)}</td>
+                       <td>${diskUsage.toFixed(1)}</td>
+                       <td>${status}</td>`;
+      resultBody.appendChild(row);
     }
   </script>
 </body>
 </html>
+
